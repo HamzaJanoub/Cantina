@@ -1,17 +1,23 @@
 const rem = document.getElementById('pop-up');
+const addBoton = document.getElementById('add-btn');
+const lazone = document.getElementById('recettes-container');
+
+let cardToEdit = "";
+let inputarray = [];
+
 
 document.getElementById('pop-up-chow').addEventListener('click', function () {
     rem.classList.remove('hidden');
 });
 
-document.getElementById('get-out-btn').addEventListener('click', function () {
+
+document.getElementById('get-out-btn').addEventListener('click', function (event) {
+    event.preventDefault()
     rem.classList.add('hidden');
+    cardToEdit = ""
+    viderFormulaire()
 });
 
-const addBoton = document.getElementById('add-btn');
-const lazone = document.getElementById('recettes-container');
-
-let cardToEdit ="";
 
 addBoton.addEventListener('click', event => {
     event.preventDefault();
@@ -21,16 +27,16 @@ addBoton.addEventListener('click', event => {
     const priceRecette = document.getElementById('prix-recette').value;
     const typeRecette = document.getElementById('type-recette').value;
 
+    
     if (nomRecette.length < 4 || nomRecette.length > 30) {
         alert('Entrer un nom entre 4 et 30 caractères');
         return;
     }
 
-    if (priceRecette < 5 || priceRecette > 50 || priceRecette === '') {
+    if (priceRecette === '' || priceRecette < 5 || priceRecette > 50) {
         alert('Entrer un prix entre 5 et 50 DH');
         return;
     }
-
 
     if (cardToEdit) {
         cardToEdit.querySelector('b').textContent =
@@ -45,15 +51,11 @@ addBoton.addEventListener('click', event => {
         cardToEdit = null;
         rem.classList.add('hidden');
 
-        document.getElementById('nom-recette').value = '';
-        document.getElementById('categorie-recette').value = '';
-        document.getElementById('prix-recette').value = '';
-        document.getElementById('type-recette').value = '';
-
+        viderFormulaire();
         return;
     }
 
-   
+
     const card = document.createElement('div');
 
     card.classList.add(
@@ -83,6 +85,19 @@ addBoton.addEventListener('click', event => {
     type.textContent = 'Type : ' + typeRecette;
 
     card.append(nom, catego, prix, type);
+
+  
+    let plat = {
+        nomm: nomRecette,
+        categoo: catégorieRecette,
+        prixx: priceRecette,
+        typpe: typeRecette
+    };
+
+    inputarray.push(plat);
+    selectRecette();
+
+    rem.classList.add('hidden')
 
 
     const editBtn = document.createElement('button');
@@ -119,6 +134,7 @@ addBoton.addEventListener('click', event => {
         'ml-4'
     );
 
+
     deletButton.addEventListener('click', () => {
         if (cardToEdit === card) {
             cardToEdit = "";
@@ -127,6 +143,7 @@ addBoton.addEventListener('click', event => {
 
         card.remove();
     });
+
 
     editBtn.addEventListener('click', () => {
         const paragraphs = card.querySelectorAll('p');
@@ -150,14 +167,40 @@ addBoton.addEventListener('click', event => {
     card.append(editBtn, deletButton);
     lazone.append(card);
 
-    allOptionSelect(nomRecette , catégorieRecette ,priceRecette)
+    viderFormulaire();
+});
 
-    rem.classList.add('hidden');
 
+function viderFormulaire() {
     document.getElementById('nom-recette').value = '';
     document.getElementById('categorie-recette').value = '';
     document.getElementById('prix-recette').value = '';
     document.getElementById('type-recette').value = '';
-});
+}
 
 
+function selectRecette() {
+    let enter = document.querySelectorAll('[id="entrée"]');
+    let principal = document.querySelectorAll('[id="principal"]');
+    let dessert = document.querySelectorAll('[id="dessert"]');
+
+    let plaat = inputarray[inputarray.length - 1];
+    let option = document.createElement('option');
+
+    option.value = plaat.nomm;
+    option.textContent = plaat.nomm + ' - ' + plaat.prixx + ' DH';
+
+    if (plaat.typpe === 'Entrée') {
+        enter.forEach(select => {
+            select.appendChild(option.cloneNode(true));
+        });
+    } else if (plaat.typpe === 'Plat principal') {
+        principal.forEach(select => {
+            select.appendChild(option.cloneNode(true));
+        });
+    } else if (plaat.typpe === 'Dessert') {
+        dessert.forEach(select => {
+            select.appendChild(option.cloneNode(true));
+        });
+    }
+}
